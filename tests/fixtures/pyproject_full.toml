@@ -1,0 +1,17 @@
+[project]
+name = "myapp"
+version = "1.0.0"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.28",
+    "packaging>=24",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "mypy>=1.10",
+]
+docs = [
+    "sphinx>=7",
+]
