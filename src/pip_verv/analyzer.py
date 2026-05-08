@@ -12,8 +12,10 @@ def analyze(
     if not releases:
         return None, Status.NO_DATA
 
-    # Select latest stable by date, as spec §2.1 mandates
-    latest = max(releases, key=lambda r: r.release_date)
+    # Select latest stable by version number (highest semver), not by upload date.
+    # Sorting by date would incorrectly pick a backport patch (lower version,
+    # newer upload) over a more recent major/minor release.
+    latest = max(releases, key=lambda r: Version(r.version))
     spec = SpecifierSet(dep.version_spec, prereleases=False)
 
     # Current: latest release from PyPI that satisfies the declared constraint,

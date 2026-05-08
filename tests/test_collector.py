@@ -214,6 +214,53 @@ class TestCaching:
         assert route.call_count == 2
 
 
+class TestParseReleasesOrdering:
+    @respx.mock
+    async def test_should_order_by_version_not_by_upload_date(
+        self, tmp_path: Path
+    ) -> None:
+        # Backport patch (2.31.5) uploaded AFTER the major release (3.0.0).
+        # The major release must still be considered the latest.
+        data = {
+            "releases": {
+                "3.0.0": [{"upload_time": "2024-01-01T00:00:00", "yanked": False}],
+                "2.31.5": [
+                    {"upload_time": "2024-06-01T00:00:00", "yanked": False}
+                ],  # newer date, lower version
+            }
+        }
+        respx.get(f"{PYPI_BASE}/requests/json").mock(
+            return_value=httpx.Response(200, json=data)
+        )
+
+        with patch.object(collector_module, "CACHE_DIR", tmp_path):
+            result = await collect(["requests"], cache_ttl=24, no_cache=True)
+
+        releases = result["requests"]
+        assert releases[0].version == "3.0.0"
+
+    @respx.mock
+    async def test_should_return_highest_version_as_latest_stable(
+        self, tmp_path: Path
+    ) -> None:
+        data = {
+            "releases": {
+                "3.0.0": [{"upload_time": "2024-01-01T00:00:00", "yanked": False}],
+                "2.31.5": [{"upload_time": "2024-06-01T00:00:00", "yanked": False}],
+            }
+        }
+        respx.get(f"{PYPI_BASE}/requests/json").mock(
+            return_value=httpx.Response(200, json=data)
+        )
+
+        with patch.object(collector_module, "CACHE_DIR", tmp_path):
+            result = await collect(["requests"], cache_ttl=24, no_cache=True)
+
+        latest = get_latest_stable(result["requests"])
+        assert latest is not None
+        assert latest.version == "3.0.0"
+
+
 class TestGetLatestStable:
     def test_should_return_first_non_yanked_release(self) -> None:
         releases = [

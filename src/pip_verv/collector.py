@@ -91,7 +91,7 @@ def _parse_releases(data: dict[str, object]) -> list[PackageRelease]:
         releases.append(
             PackageRelease(version=str(v), release_date=release_date, yanked=False)
         )
-    releases.sort(key=lambda r: r.release_date, reverse=True)
+    releases.sort(key=lambda r: Version(r.version), reverse=True)
     return releases
 
 

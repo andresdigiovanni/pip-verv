@@ -630,3 +630,47 @@ class TestAnalyzePostReleaseDeclared:
         assert declared == "2.28.0.post1"
         assert status == Status.OUTDATED  # latest 2.31.0 ≠ ==2.28.0.post1
 
+
+# ---------------------------------------------------------------------------
+# Backport-patch ordering regression
+# ---------------------------------------------------------------------------
+
+
+class TestAnalyzeBackportPatch:
+    """Latest version must be determined by version number, not upload date.
+    A backport patch (lower version, newer upload date) must NOT be treated
+    as the "latest" release.
+    """
+
+    def test_should_treat_highest_version_as_latest_when_backport_has_newer_date(
+        self,
+    ) -> None:
+        dep = _make_dep("pkg", "==3.0.0")
+        releases = _make_releases(
+            # 3.0.0 was released first but is the higher version
+            ("3.0.0", "2024-01-01T00:00:00"),
+            # 2.31.5 is a backport patch uploaded later
+            ("2.31.5", "2024-06-01T00:00:00"),
+        )
+
+        declared, status = analyze(dep, releases)
+
+        # 3.0.0 is up-to-date — the backport patch must not be mistaken for latest
+        assert declared == "3.0.0"
+        assert status == Status.UP_TO_DATE
+
+    def test_should_be_outdated_relative_to_highest_version_not_newest_upload(
+        self,
+    ) -> None:
+        dep = _make_dep("pkg", "==2.31.5")
+        releases = _make_releases(
+            ("3.0.0", "2024-01-01T00:00:00"),
+            ("2.31.5", "2024-06-01T00:00:00"),
+        )
+
+        declared, status = analyze(dep, releases)
+
+        # 3.0.0 is the true latest; being pinned to 2.31.5 is OUTDATED
+        assert declared == "2.31.5"
+        assert status == Status.OUTDATED
+
