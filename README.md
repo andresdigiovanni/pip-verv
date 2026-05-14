@@ -134,38 +134,21 @@ $$
 
 ---
 
-## Example JSON Output
+## Example Output
 
-```json
-{
-  "score": 86.2,
-  "generated_at": "2026-05-05T09:28:08.576154",
-  "dependencies": [
-    {
-      "name": "pyarrow",
-      "status": "outdated",
-      "installed": "23.0.0",
-      "latest": "24.0.0",
-      "target": "24.0.0",
-      "bump": "major",
-      "urgency": "minor",
-      "days_behind": 92,
-      "blockers": []
-    },
-    {
-      "name": "pandas",
-      "status": "outdated",
-      "installed": "2.3.3",
-      "latest": "3.0.2",
-      "target": null,
-      "bump": "major",
-      "urgency": "minor",
-      "days_behind": 182,
-      "blockers": ["streamlit (<3,>=1.4.0)"]
-    }
-    // ...
-  ]
-}
+```text
+| Name              | Status     | Installed | Latest | Target | Bump  | Urgency | Days Behind | Blockers               |
+|-------------------|------------|-----------|--------|--------|-------|---------|-------------|------------------------|
+| hydra-core        | up_to_date | 1.3.2     | 1.3.2  |        |       | na      | 0           |                        |
+| pandas            | outdated   | 2.3.3     | 3.0.3  |        | major | minor   | 223         | streamlit (<3,>=1.4.0) |
+| omegaconf         | up_to_date | 2.3.0     | 2.3.0  |        |       | na      | 0           |                        |
+| tqdm              | outdated   | 4.67.1    | 4.67.3 | 4.67.3 | patch | patch   | 435         |                        |
+| pyarrow           | outdated   | 23.0.0    | 24.0.0 | 24.0.0 | major | minor   | 92          |                        |
+| pydantic          | outdated   | 2.12.5    | 2.13.4 | 2.13.4 | minor | minor   | 160         |                        |
+| pydantic-settings | outdated   | 2.12.0    | 2.14.1 | 2.14.1 | minor | minor   | 178         |                        |
+| streamlit         | outdated   | 1.53.0    | 1.57.0 | 1.57.0 | minor | minor   | 104         |                        |
+| plotly            | outdated   | 6.5.2     | 6.7.0  | 6.7.0  | minor | patch   | 84          |                        |
+| python-dotenv     | outdated   | 1.2.1     | 1.2.2  | 1.2.2  | patch | patch   | 126         |                        |
 ```
 
 ---
