@@ -6,8 +6,8 @@
 ██╔══██╗██║██╔══██╗      ██║   ██║██╔════╝██╔══██╗██║   ██║
 ██████╔╝██║██████╔╝█████╗██║   ██║█████╗  ██████╔╝██║   ██║
 ██╔═══╝ ██║██╔═══╝ ╚════╝╚██╗ ██╔╝██╔══╝  ██╔══██╗╚██╗ ██╔╝
-██║     ██║██║             ╚████╔╝ ███████╗██║  ██║ ╚████╔╝
-╚═╝     ╚═╝╚═╝              ╚═══╝  ╚══════╝╚═╝  ╚═╝  ╚═══╝
+██║     ██║██║            ╚████╔╝ ███████╗██║  ██║ ╚████╔╝
+╚═╝     ╚═╝╚═╝             ╚═══╝  ╚══════╝╚═╝  ╚═╝  ╚═══╝
 ```
 
 **pip-verv** (Version Review) is a read-only CLI tool that audits the temporal freshness of Python dependencies. It measures how long each dependency has been behind the latest stable release on PyPI, calculates a per-package GAP in days, and produces a project-wide Health Score (0–100). It does not install, modify, or resolve environments.
