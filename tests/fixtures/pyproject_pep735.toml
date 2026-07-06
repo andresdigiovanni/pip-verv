@@ -1,0 +1,16 @@
+[project]
+name = "myapp"
+version = "1.0.0"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "mypy>=1.10",
+    {include-group = "lint"},
+]
+docs = [
+    "sphinx>=7.0",
+]
+lint = [
+    "ruff>=0.4",
+]

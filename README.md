@@ -52,6 +52,30 @@ verv --no-cache
 
 ---
 
+## Supported File Formats
+
+`pip-verv` auto-discovers and parses dependency declarations from the following sources:
+
+| File | Sections parsed |
+|------|----------------|
+| `requirements*.txt` | All pinned/ranged deps; follows `-r` includes recursively |
+| `pyproject.toml` (PEP 621) | `[project.dependencies]`, `[project.optional-dependencies.*]` |
+| `pyproject.toml` (PEP 735 / uv) | `[dependency-groups.*]` |
+| `pyproject.toml` (Poetry) | `[tool.poetry.dependencies]`, `[tool.poetry.group.*.dependencies]` |
+
+**Poetry constraint mapping:**
+
+| Poetry syntax | PEP 440 equivalent |
+|---|---|
+| `^1.2.3` | `>=1.2.3,<2.0.0` |
+| `^0.2.3` | `>=0.2.3,<0.3.0` |
+| `~1.2.3` | `>=1.2.3,<1.3.0` |
+| `*` | *(any version, audited without version filter)* |
+
+Git, path, and URL dependencies are detected but flagged as **not auditable** (excluded from the Health Score).
+
+---
+
 ## CLI Flags
 
 | Flag               | Description                                              |

@@ -196,3 +196,124 @@ class TestUnicodeAndEncoding:
 
         names = [d.name for d in result]
         assert len(names) == 2
+
+
+class TestParsePyprojectPoetry:
+    def test_should_parse_main_dependencies(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        names = [d.name.lower() for d in result]
+        assert "requests" in names
+        assert "flask" in names
+
+    def test_should_skip_python_key(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        names = [d.name.lower() for d in result]
+        assert "python" not in names
+
+    def test_should_parse_group_dependencies(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        names = [d.name.lower() for d in result]
+        assert "pytest" in names
+        assert "mypy" in names
+        assert "sphinx" in names
+
+    def test_should_convert_caret_constraint_to_pep440(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        requests = next(d for d in result if d.name.lower() == "requests")
+        assert requests.version_spec == ">=2.28,<3.0"
+
+    def test_should_convert_tilde_constraint_to_pep440(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        # ~24.1 means >=24.1,<24.2 (increments the rightmost non-zero segment)
+        packaging = next(d for d in result if d.name.lower() == "packaging")
+        assert packaging.version_spec == ">=24.1,<24.2"
+
+    def test_should_treat_wildcard_as_empty_spec(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        anyversion = next(d for d in result if d.name.lower() == "anyversion")
+        assert anyversion.version_spec == ""
+        assert anyversion.is_auditable is True
+
+    def test_should_extract_extras_from_dict_constraint(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        flask = next(d for d in result if d.name.lower() == "flask")
+        assert "async" in flask.extras
+
+    def test_should_mark_git_dep_as_not_auditable(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        git_dep = next(d for d in result if d.name.lower() == "mylib-git")
+        assert git_dep.is_auditable is False
+
+    def test_should_mark_path_dep_as_not_auditable(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_poetry.toml"])
+
+        path_dep = next(d for d in result if d.name.lower() == "mylib-path")
+        assert path_dep.is_auditable is False
+
+    def test_should_convert_caret_single_segment(self, tmp_path: Path) -> None:
+        toml = tmp_path / "pyproject.toml"
+        toml.write_text('[tool.poetry.dependencies]\nrequests = "^2"\n')
+
+        result = parse_sources([toml])
+
+        dep = next(d for d in result if d.name.lower() == "requests")
+        assert dep.version_spec == ">=2,<3"
+
+    def test_should_convert_caret_zero_major(self, tmp_path: Path) -> None:
+        toml = tmp_path / "pyproject.toml"
+        toml.write_text('[tool.poetry.dependencies]\nmylib = "^0.2.3"\n')
+
+        result = parse_sources([toml])
+
+        dep = result[0]
+        assert dep.version_spec == ">=0.2.3,<0.3.0"
+
+    def test_should_handle_poetry_without_groups(self, tmp_path: Path) -> None:
+        toml = tmp_path / "pyproject.toml"
+        toml.write_text(
+            '[tool.poetry.dependencies]\nrequests = ">=2.28"\n'
+        )
+
+        result = parse_sources([toml])
+
+        assert len(result) == 1
+        assert result[0].name == "requests"
+
+
+class TestParsePyprojectPep735:
+    def test_should_parse_all_dependency_groups(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_pep735.toml"])
+
+        names = [d.name.lower() for d in result]
+        assert "pytest" in names
+        assert "mypy" in names
+        assert "sphinx" in names
+        assert "ruff" in names
+
+    def test_should_skip_include_group_items(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_pep735.toml"])
+
+        # {include-group = "lint"} should not produce a dependency entry
+        assert all(d.name != "lint" for d in result)
+
+    def test_should_parse_version_specs(self) -> None:
+        result = parse_sources([FIXTURES / "pyproject_pep735.toml"])
+
+        pytest_dep = next(d for d in result if d.name.lower() == "pytest")
+        assert pytest_dep.version_spec == ">=8.0"
+
+    def test_should_return_empty_when_no_dependency_groups(self, tmp_path: Path) -> None:
+        toml = tmp_path / "pyproject.toml"
+        toml.write_text("[project]\nname = 'myapp'\n")
+
+        result = parse_sources([toml])
+
+        assert result == []

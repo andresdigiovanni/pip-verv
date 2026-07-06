@@ -11,3 +11,6 @@ wheels/
 
 # Ignore GitHub config directory
 .github/
+
+# Ignore VS Code config directory
+.vscode/

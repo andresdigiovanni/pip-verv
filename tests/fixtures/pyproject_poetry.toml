@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "myapp"
+version = "1.0.0"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.28"
+flask = {version = "^3.0", extras = ["async"]}
+mylib-git = {git = "https://github.com/org/mylib.git", branch = "main"}
+mylib-path = {path = "../mylib"}
+anyversion = "*"
+packaging = "~24.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+mypy = ">=1.10"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.0"
